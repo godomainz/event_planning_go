@@ -100,3 +100,24 @@ func (e Event) Update() error {
 	return nil
 
 }
+
+func (e Event) Delele() error {
+	query := "DELETE FROM events WHERE id = ?"
+	stmt, err := db.DB.Prepare(query)
+	if err != nil{
+		return err
+	}
+
+	defer stmt.Close()
+	result, err := stmt.Exec(e.ID)
+	if err != nil{
+		return err
+	}
+
+	_ , err = result.RowsAffected()
+	if err != nil{
+		return err
+	}
+
+	return nil
+}
