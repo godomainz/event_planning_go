@@ -14,8 +14,6 @@ type Event struct {
 	UserID      int
 }
 
-var events = []Event{}
-
 func (e Event) Save() error {
 	query := `
 	INSERT INTO events(name, description, location, dateTime, user_id)
@@ -32,8 +30,7 @@ func (e Event) Save() error {
 		return err
 	}
 
-	id, err := result.LastInsertId()
-	e.ID = id
+	_, err = result.LastInsertId()
 	return err
 }
 
