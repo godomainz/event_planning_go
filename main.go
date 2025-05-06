@@ -1,6 +1,7 @@
 package main
 
 import (
+	"event_planning_go/db"
 	"event_planning_go/models"
 	"net/http"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func main() {
+	db.InitDB()
 	server := gin.Default()
 
 	server.GET("/events", getEvents)
