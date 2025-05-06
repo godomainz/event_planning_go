@@ -4,6 +4,7 @@ import (
 	"event_planning_go/db"
 	"event_planning_go/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,7 @@ func main() {
 
 	server.GET("/events", getEvents)
 	server.POST("/events", createEvents)
+	server.GET("/event/:id", getEvent)
 	server.Run(":8081")
 }
 
@@ -23,6 +25,22 @@ func getEvents(context *gin.Context){
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch events. Try again later.", "error": err.Error()})
 	}
 	context.JSON(http.StatusOK, events)
+}
+
+func getEvent(context *gin.Context){
+	eventId, err :=  strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message" : "Could not parse event id","error": err.Error()})
+		return
+	}
+
+	event, err := models.GetEventByID(eventId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message" : "Could not fetch event","error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"event": event})
 }
 
 func createEvents(context *gin.Context){
