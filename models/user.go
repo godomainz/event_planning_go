@@ -45,12 +45,12 @@ func (user User) ValidateCredentials() error {
 	var retrievedPassword string
 	err := row.Scan(&retrievedPassword)
 	if err != nil {
-		return errors.New("Invalid Credentials")
+		return errors.New("invalid credentials")
 	}
 
 	isValidPassword := utils.CheckPasswordHash(user.Password, retrievedPassword)
 	if !isValidPassword {
-		return errors.New("Invalid Credentials")
+		return errors.New("invalid credentials")
 	}
 
 	return nil
