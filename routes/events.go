@@ -2,6 +2,7 @@ package routes
 
 import (
 	"event_planning_go/models"
+	"event_planning_go/utils"
 	"net/http"
 	"strconv"
 
@@ -40,8 +41,14 @@ func createEvents(context *gin.Context) {
 		return
 	}
 
+	err := utils.VerifyToken(token)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Token"})
+		return
+	}
+
 	var event models.Event
-	err := context.ShouldBindJSON(&event)
+	err = context.ShouldBindJSON(&event)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not parse request data.", "error": err.Error()})
