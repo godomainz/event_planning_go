@@ -59,28 +59,35 @@ func updateEvent(context *gin.Context){
 		return
 	}
 
-	_, err = models.GetEventByID(eventId)
+	userId := context.GetInt64("userId")
+	event, err := models.GetEventByID(eventId)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could fetch the event with that event id", "error": err.Error()})
 		return
 	}
+
+	if event.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized to update event"})
+		return
+	}
 	
-	var event models.Event
-	err = context.ShouldBindJSON(&event)
+	var updatedEvent models.Event
+	err = context.ShouldBindJSON(&updatedEvent)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not parse request data.", "error": err.Error()})
 		return
 	}
 
-	event.ID = eventId
-	err = event.Update()
+	updatedEvent.ID = eventId
+	updatedEvent.UserID = userId
+	err = updatedEvent.Update()
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update event.", "error": err.Error()})
 		return
 	}
 
-	context.JSON(http.StatusCreated, gin.H{"message": "event updated!", "event": event})
+	context.JSON(http.StatusCreated, gin.H{"message": "event updated!", "event": updatedEvent})
 }
 
 func deleteEvent(context *gin.Context){
@@ -90,16 +97,22 @@ func deleteEvent(context *gin.Context){
 		return
 	}
 
-	_, err = models.GetEventByID(eventId)
+	userId := context.GetInt64("userId")
+	event, err := models.GetEventByID(eventId)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could fetch the event with that event id", "error": err.Error()})
 		return
 	}
-	
-	var event models.Event
 
-	event.ID = eventId
-	err = event.Delele()
+	if event.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized to delete event"})
+		return
+	}
+	
+	var deletedEvent models.Event
+
+	deletedEvent.ID = eventId
+	err = deletedEvent.Delele()
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete event.", "error": err.Error()})
